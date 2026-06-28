@@ -1,3 +1,4 @@
+import * as userService from "./api/userService";
 import { useMemo, useState } from "react";
 import {
   FiFilter,
@@ -176,13 +177,22 @@ function App() {
     setEditingUser(null);
   };
 
-  const handleDeleteConfirm = () => {
-    setUsers((prev) =>
-      prev.filter((u) => u.id !== selectedUser)
-    );
 
-    setShowDelete(false);
-    setSelectedUser(null);
+  const handleDeleteConfirm = async () => {
+    try {
+      // Call DELETE API
+      await userService.deleteUser(selectedUser);
+
+      // Remove user from UI
+      setUsers((prev) =>
+        prev.filter((u) => u.id !== selectedUser)
+      );
+
+      setShowDelete(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
   };
 
   const selectedUserData = users.find(
@@ -206,7 +216,13 @@ function App() {
   }
   console.log(users.length);
   return (
+
     <div className="app">
+      {error && (
+        <div className="error-banner">
+          <strong>System Alert:</strong> {error}
+        </div>
+      )}
       <Header />
       <StatsCards users={users} />
       <div className="toolbar">

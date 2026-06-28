@@ -29,50 +29,73 @@ export const useUsers = () => {
     fetchUsers();
   }, []);
 
-  const addUser = async (user) => {
-    try {
-      const response = await userService.createUser(user);
+ const addUser = async (user) => {
+  try {
+    setError(null);
 
-      const newUser = mapUserData(response.data);
+    const response = await userService.createUser(user);
 
-      setUsers((prev) => [...prev, newUser]);
+    const newUser = mapUserData(response.data);
 
-      return newUser;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
+    setUsers((prev) => [...prev, newUser]);
 
-  const updateUser = async (id, user) => {
-    try {
-      const response = await userService.updateUser(id, user);
+    return newUser;
+  } catch (err) {
+    console.error(err);
 
-      const updated = mapUserData(response.data);
+    setError(
+      "Unable to create the user. Please verify your connection and try again."
+    );
 
-      setUsers((prev) =>
-        prev.map((u) => (u.id === id ? updated : u))
-      );
+    return null;
+  }
+};
 
-      return updated;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
+const updateUser = async (id, user) => {
+  try {
+    setError(null);
 
-  const deleteUser = async (id) => {
-    try {
-      await userService.deleteUser(id);
+    const response = await userService.updateUser(id, user);
 
-      setUsers((prev) =>
-        prev.filter((u) => u.id !== id)
-      );
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
+    const updated = mapUserData(response.data);
+
+    setUsers((prev) =>
+      prev.map((u) => (u.id === id ? updated : u))
+    );
+
+    return updated;
+  } catch (err) {
+    console.error(err);
+
+    setError(
+      "Unable to update user information. Please try again."
+    );
+
+    return null;
+  }
+};
+
+ const deleteUser = async (id) => {
+  try {
+    setError(null);
+
+    await userService.deleteUser(id);
+
+    setUsers((prev) =>
+      prev.filter((u) => u.id !== id)
+    );
+
+    return true;
+  } catch (err) {
+    console.error(err);
+
+    setError(
+      "Unable to delete the selected user. Please try again."
+    );
+
+    return false;
+  }
+};
 
   return {
     users,
